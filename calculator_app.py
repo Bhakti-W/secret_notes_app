@@ -1,90 +1,140 @@
 import tkinter as tk 
-calculation =""
-def add_to_calc(symbol):
-   global calculation
-   calculation += str(symbol)
-   text_result.delete(1.0,"end")
-   text_result.insert(1.0,calculation)
 
-def eval_calc():
-    global calculation
-    try:
-         calculation=str(eval(calculation))
-       
-         text_result.delete(1.0,"end")
-         text_result.insert(1.0,calculation)
-    except:
-     clear_feild()
-     text_result.insert(1.0,"Why are u even trying?!")
-     pass
-def clear_feild():
-     global calculation
-     calculation=""
-     text_result.delete(1.0,"end")
-     pass 
-root = tk.Tk()
-root.geometry("300x275")
+class CalculatorFrame(tk.Frame):
+    def __init__(self, parent, show_notes_callback):
+        super().__init__(parent)
+        self.grid_rowconfigure(0, weight=0)  
+        for i in range(1,6):
+         self.grid_rowconfigure(i, weight=1)  
 
-text_result=tk.Text(root,height=2,width=16,font=("Ariel",24))
-text_result.grid(columnspan=5)
-btn_1=tk.Button(root,text="1",command=lambda:add_to_calc(1),width=5,font=("Ariel",14))
-btn_1.grid(row=2,column=1)
 
-btn_2=tk.Button(root,text="2",command=lambda:add_to_calc(2),width=5,font=("Ariel",14))
-btn_2.grid(row=2,column=2)
+        for j in range(5):
+         self.grid_columnconfigure(j, weight=1)
+         self.show_notes_callback = show_notes_callback
 
-btn_1=tk.Button(root,text="3",command=lambda:add_to_calc(3),width=5,font=("Ariel",14))
-btn_1.grid(row=2,column=3)
 
-btn_1=tk.Button(root,text="4",command=lambda:add_to_calc(4),width=5,font=("Ariel",14))
-btn_1.grid(row=3,column=1)
+        global calculation
+        calculation =""
 
-btn_1=tk.Button(root,text="5",command=lambda:add_to_calc(5),width=5,font=("Ariel",14))
-btn_1.grid(row=3,column=2)
+        def add_to_calc(symbol):
+            global calculation
+            calculation += str(symbol)
+            text_result.delete(1.0,"end")
+            text_result.insert(1.0,calculation)
 
-btn_1=tk.Button(root,text="6",command=lambda:add_to_calc(6),width=5,font=("Ariel",14))
-btn_1.grid(row=3,column=3)
+        def eval_calc():
+            global calculation
+            if calculation == "69/67":
+                calculation = ""
+                text_result.delete(1.0,"end")
+                self.show_notes_callback()
+                return
+            try:
+                calculation=str(eval(calculation))
+                text_result.delete(1.0,"end")
+                text_result.insert(1.0,calculation)
+            except:
+                clear_feild()
+                text_result.insert(1.0,"Why are u even trying?!")
 
-btn_1=tk.Button(root,text="7",command=lambda:add_to_calc(7),width=5,font=("Ariel",14))
-btn_1.grid(row=4,column=1)
+        def clear_feild():
+            global calculation
+            calculation=""
+            text_result.delete(1.0,"end")
+        def backspace():
+         global calculation
+         calculation = calculation[:-1]
+         text_result.delete(1.0, "end")
+         text_result.insert(1.0, calculation)
 
-btn_1=tk.Button(root,text="8",command=lambda:add_to_calc(8),width=5,font=("Ariel",14))
-btn_1.grid(row=4,column=2)
+        def on_key(event):
+           key = event.keysym
 
-btn_1=tk.Button(root,text="9",command=lambda:add_to_calc(9),width=5,font=("Ariel",14))
-btn_1.grid(row=4,column=3)
+           if key in "0123456789":
+            add_to_calc(key)
+           elif key in ("plus", "KP_Add"):
+            add_to_calc("+")
+           elif key in ("minus", "KP_Subtract"):
+            add_to_calc("-")
+           elif key in ("asterisk", "KP_Multiply"):
+             add_to_calc("*")
+           elif key in ("slash", "KP_Divide"):
+            add_to_calc("/")
+           elif key == "Return":
+            eval_calc()
+           elif key == "BackSpace":
+            backspace()
+           elif key == "Escape":
+            clear_feild()
+           elif key == "period":
+            add_to_calc(".")
 
-btn_1=tk.Button(root,text="+",command=lambda:add_to_calc("+"),width=5,font=("Ariel",14))
-btn_1.grid(row=4,column=4)
+           self.bind("<Key>", on_key)
+           self.focus_set()
 
-btn_1=tk.Button(root,text="-",command=lambda:add_to_calc("-"),width=5,font=("Ariel",14))
-btn_1.grid(row=3,column=4)
+        text_result=tk.Text(self, height=2, font=("Ariel",24))
+        text_result.grid(row=0, column=0, columnspan=5, sticky="nsew", padx=4, pady=4)
 
-btn_1=tk.Button(root,text="x",command=lambda:add_to_calc("*"),width=5,font=("Ariel",14))
-btn_1.grid(row=2,column=4)
+        btn_1=tk.Button(self,text="1",command=lambda:add_to_calc(1),font=("Ariel",14))
+        btn_1.grid(row=2,column=1,sticky="nsew", padx=2, pady=2)
 
-btn_1=tk.Button(root,text="÷",command=lambda:add_to_calc("/"),width=5,font=("Ariel",14))
-btn_1.grid(row=1,column=4)
+        btn_2=tk.Button(self,text="2",command=lambda:add_to_calc(2),font=("Ariel",14))
+        btn_2.grid(row=2,column=2,sticky="nsew", padx=2, pady=2)
 
-btn_1=tk.Button(root,text="=",command=eval_calc,width=5,font=("Ariel",14))
-btn_1.grid(row=5,column=4)
+        btn_1=tk.Button(self,text="3",command=lambda:add_to_calc(3),font=("Ariel",14))
+        btn_1.grid(row=2,column=3,sticky="nsew", padx=2, pady=2)
 
-btn_1=tk.Button(root,text="0",command=lambda:add_to_calc(0),width=5,font=("Ariel",14))
-btn_1.grid(row=5,column=2)
+        btn_1=tk.Button(self,text="4",command=lambda:add_to_calc(4),font=("Ariel",14))
+        btn_1.grid(row=3,column=1,sticky="nsew", padx=2, pady=2)
 
-btn_1=tk.Button(root,text=".",command=lambda:add_to_calc("."),width=5,font=("Ariel",14))
-btn_1.grid(row=5,column=3)
+        btn_1=tk.Button(self,text="5",command=lambda:add_to_calc(5),font=("Ariel",14))
+        btn_1.grid(row=3,column=2,sticky="nsew", padx=2, pady=2)
 
-btn_1=tk.Button(root,text="x²",command=lambda:add_to_calc("^2"),width=5,font=("Ariel",14))
-btn_1.grid(row=5,column=1)
+        btn_1=tk.Button(self,text="6",command=lambda:add_to_calc(6),font=("Ariel",14))
+        btn_1.grid(row=3,column=3,sticky="nsew", padx=2, pady=2)
 
-btn_1=tk.Button(root,text="(",command=lambda:add_to_calc("("),width=5,font=("Ariel",14))
-btn_1.grid(row=1,column=1)
+        btn_1=tk.Button(self,text="7",command=lambda:add_to_calc(7),font=("Ariel",14))
+        btn_1.grid(row=4,column=1,sticky="nsew", padx=2, pady=2)
 
-btn_1=tk.Button(root,text=")",command=lambda:add_to_calc(")"),width=5,font=("Ariel",14))
-btn_1.grid(row=1,column=2)
+        btn_1=tk.Button(self,text="8",command=lambda:add_to_calc(8),font=("Ariel",14))
+        btn_1.grid(row=4,column=2,sticky="nsew", padx=2, pady=2)
 
-btn_1=tk.Button(root,text="C",command=clear_feild,width=5,font=("Ariel",14))
-btn_1.grid(row=1,column=3)
+        btn_1=tk.Button(self,text="9",command=lambda:add_to_calc(9),font=("Ariel",14))
+        btn_1.grid(row=4,column=3,sticky="nsew", padx=2, pady=2)
 
-root.mainloop()
+        btn_1=tk.Button(self,text="+",command=lambda:add_to_calc("+"),font=("Ariel",14))
+        btn_1.grid(row=4,column=4,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text="-",command=lambda:add_to_calc("-"),font=("Ariel",14))
+        btn_1.grid(row=3,column=4,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text="x",command=lambda:add_to_calc("*"),font=("Ariel",14))
+        btn_1.grid(row=2,column=4,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text="÷",command=lambda:add_to_calc("/"),font=("Ariel",14))
+        btn_1.grid(row=1,column=4,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text="=",command=eval_calc,font=("Ariel",14))
+        btn_1.grid(row=5,column=4,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text="0",command=lambda:add_to_calc(0),font=("Ariel",14))
+        btn_1.grid(row=5,column=2,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text=".",command=lambda:add_to_calc("."),font=("Ariel",14))
+        btn_1.grid(row=5,column=3,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text="⌫",command=backspace,font=("Ariel",14))
+        btn_1.grid(row=5,column=1,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text="(",command=lambda:add_to_calc("("),font=("Ariel",14))
+        btn_1.grid(row=1,column=1,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text=")",command=lambda:add_to_calc(")"),font=("Ariel",14))
+        btn_1.grid(row=1,column=2,sticky="nsew", padx=2, pady=2)
+
+        btn_1=tk.Button(self,text="C",command=clear_feild,font=("Ariel",14))
+        btn_1.grid(row=1,column=3,sticky="nsew", padx=2, pady=2)
+
+        self.bind("<Key>", on_key)
+        self.focus_set()
+
