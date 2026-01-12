@@ -1,84 +1,111 @@
 import tkinter as tk
-from tkinter import ttk,messagebox
-import json 
+from tkinter import ttk, messagebox
+import json
+import os
 
 class NotesFrame(tk.Frame):
-    def __init__(self, parent,show_calc_callback,root):
+    def __init__(self, parent, show_calc_callback, root):
         super().__init__(parent)
         self.show_calc_callback = show_calc_callback
         root.geometry("500x500")
 
-        notes={}
-        try:
+        self.notes = {}
+        if os.path.exists("notes.json"):
             with open("notes.json", "r") as f:
-                notes = json.load(f)
-        except FileNotFoundError:
-            pass
+                self.notes = json.load(f)
 
-        notebook = ttk.Notebook(self)
-        notebook.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
-        def add_note():
-            note_frame = ttk.Frame(notebook, padding=10)
-            notebook.add(note_frame, text="New Note")
-
-            title_entry = ttk.Entry(note_frame, width=40)
-            title_entry.grid(row=0, column=1)
-
-            content_entry = tk.Text(note_frame, width=40, height=10)
-            content_entry.grid(row=1, column=1)
-
-            ttk.Label(note_frame, text="Title").grid(row=0,column=0)
-            ttk.Label(note_frame, text="Content").grid(row=1,column=0)
-
-            def save_note():
-                title = title_entry.get().strip()
-                content = content_entry.get("1.0", tk.END).strip()
-                if not title:
-                    messagebox.showerror("Error", "Title cannot be empty")
-                    return
-
-                notes[title] = content
-                with open("notes.json","w") as f:
-                    json.dump(notes,f)
-
-                notebook.forget(notebook.select())
-
-                frame = ttk.Frame(notebook)
-                text = tk.Text(frame)
-                text.insert("1.0", content)
-                text.pack(expand=True, fill="both")
-                notebook.add(frame, text=title)
-
-            ttk.Button(note_frame, text="Save", command=save_note).grid(row=2,column=1)
-
-        def load_notes():
-            try:
-                with open("notes.json","r") as f:
-                    loaded = json.load(f)
-                for title,content in loaded.items():
-                    frame = ttk.Frame(notebook)
-                    text = tk.Text(frame)
-                    text.insert("1.0", content)
-                    text.pack(expand=True, fill="both")
-                    notebook.add(frame, text=title)
-            except:
-                pass
-
-        def delete_note():
-            tab = notebook.select()
-            title = notebook.tab(tab,"text")
-            if messagebox.askyesno("Delete", f"Delete {title}?"):
-                notebook.forget(tab)
-                notes.pop(title,None)
-                with open("notes.json","w") as f:
-                    json.dump(notes,f)
-
-        load_notes()
+        self.build_tabs()
 
         control = tk.Frame(self)
-        control.pack()
+        control.pack(pady=5)
 
-        ttk.Button(control, text="New Note", command=add_note).pack(side=tk.LEFT)
-        ttk.Button(control, text="Delete", command=delete_note).pack(side=tk.LEFT)
-        ttk.Button(control, text="Back", command=self.show_calc_callback).pack(side=tk.LEFT)
+        ttk.Button(control, text="New Note", command=self.new_note).pack(side="left", padx=5)
+        ttk.Button(control, text="Delete", command=self.delete_note).pack(side="left", padx=5)
+        ttk.Button(control, text="Back", command=self.show_calc_callback).pack(side="left", padx=5)
+
+    def save_file(self):
+        with open("notes.json", "w") as f:
+            json.dump(self.notes, f, indent=4)
+
+    def clear_tabs(self):
+        for tab in self.notebook.tabs():
+            self.notebook.forget(tab)
+
+    def build_tabs(self):
+        self.clear_tabs()
+        for title, data in self.notes.items():
+            content = data["content"] if isinstance(data, dict) else data
+            color = data.get("color","white") if isinstance(data, dict) else "white"
+            self.create_tab(title, content, color)
+
+    def create_tab(self, title, content, color):
+        frame = tk.Frame(self.notebook)
+        frame.pack(fill="both", expand=True)
+
+        frame.text = tk.Text(frame, bg=color)
+        frame.text.insert("1.0", content)
+        frame.text.config(state="disabled")
+        frame.text.pack(fill="both", expand=True, padx=10, pady=10)
+
+        frame.color_var = tk.StringVar(value=color)
+        color_menu = ttk.Combobox(frame, textvariable=frame.color_var,values=["white","lightblue","lightpink","lightyellow","lightgreen"],state="readonly", width=12)
+        color_menu.pack(side="left", padx=5)
+
+        def enable_edit():
+            frame.text.config(state="normal")
+
+        def save_edit():
+            new_content = frame.text.get("1.0", tk.END).strip()
+            new_color = frame.color_var.get()
+            self.notes[title] = {"content": new_content, "color": new_color}
+            self.save_file()
+            frame.text.config(state="disabled", bg=new_color)
+
+        ttk.Button(frame, text="Edit", command=enable_edit).pack(side="left", padx=5)
+        ttk.Button(frame, text="Save Edit", command=save_edit).pack(side="left", padx=5)
+
+        self.notebook.add(frame, text=title)
+
+    def new_note(self):
+        frame = tk.Frame(self.notebook)
+        frame.pack(fill="both", expand=True)
+
+        title_entry = ttk.Entry(frame)
+        title_entry.pack(pady=5)
+
+        color_var = tk.StringVar(value="white")
+        color_menu = ttk.Combobox(frame, textvariable=color_var,values=["white","lightblue","lightpink","lightyellow","lightgreen"],state="readonly")
+        color_menu.pack(pady=5)
+
+        text = tk.Text(frame)
+        text.pack(fill="both", expand=True, padx=10, pady=10)
+
+        def save():
+            title = title_entry.get().strip()
+            if not title:
+                messagebox.showerror("Error", "Title cannot be empty")
+                return
+            self.notes[title] = {"content": text.get("1.0", tk.END).strip(),"color": color_var.get()}
+            self.save_file()
+            self.build_tabs()
+
+        ttk.Button(frame, text="Save", command=save).pack(pady=5)
+
+        self.notebook.add(frame, text="New Note")
+        self.notebook.select(frame)
+
+    def delete_note(self):
+        tab = self.notebook.select()
+        if not tab:
+            return
+        title = self.notebook.tab(tab, "text")
+        if title == "New Note":
+            self.notebook.forget(tab)
+            return
+        if messagebox.askyesno("Delete", f"Delete {title}?"):
+            self.notes.pop(title, None)
+            self.save_file()
+            self.build_tabs()
