@@ -7,7 +7,7 @@ class NotesFrame(tk.Frame):
     def __init__(self, parent, show_calc_callback, root):
         super().__init__(parent)
         self.show_calc_callback = show_calc_callback
-        root.geometry("500x500")
+        root.geometry("500x600")
 
         self.notes = {}
         if os.path.exists("notes.json"):
@@ -109,3 +109,4 @@ class NotesFrame(tk.Frame):
             self.notes.pop(title, None)
             self.save_file()
             self.build_tabs()
+
