@@ -4,7 +4,7 @@ from notes_app import NotesFrame
 
 root = tk.Tk()
 root.title("Calculator")
-root.geometry("500x500")
+root.geometry("500x600")
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
 
@@ -23,4 +23,5 @@ notes = NotesFrame(root, show_calc,root)
 calc.pack(fill="both", expand=True)
 
 root.mainloop()
+
 
