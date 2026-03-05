@@ -5,7 +5,7 @@ Has an easter egg in it(hint the square of the number is the addition of the sam
 
 To use it:
 
-Click on ** "Code"** download the zip file 
+Click on **"Code"** download the zip file 
 
 Extract the zip file
 
