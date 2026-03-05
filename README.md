@@ -5,13 +5,13 @@ Has an easter egg in it(hint the square of the number is the addition of the sam
 
 To use it:
 
-click on "Code" download the zip file 
+Click on ** "Code"** download the zip file 
 
 Extract the zip file
 
-Open VS code select the folder secret_notes_app
+Open VS code or any text editor you have select the folder secret_notes_app
 
-click on the integration.py file 
+click on the **integration.py file** 
 
 Run it 
 
